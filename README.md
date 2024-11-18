@@ -1,2 +1,3 @@
 # sudoku_solver
-Sodoku puzzle creator with built in solving algorithm
+
+Sudoku puzzle creator with built in solving algorithm
