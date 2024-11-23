@@ -1,7 +1,4 @@
 const sudokuGrid = document.body.querySelector(".sudoku-grid");
-const rows = {};
-const columns = {};
-const subGrids = {};
 
 // fisher-yates shuffle
 const shuffle = (array) => {
@@ -12,7 +9,67 @@ const shuffle = (array) => {
     return array;
 };
 
-const createGrid = () => {
+const sudokuSolver = (grid) => {
+    const newGrid = [];
+    for (let i = 0; i < grid.length; i += 9) {
+        newGrid.push(grid.slice(i, i + 9));
+    }
+
+    let solutions = 0;
+
+    const backtrack = (r, c) => {
+        if (r === 9) {
+            solutions++;
+            return;
+        }
+
+        const nextR = c === 8 ? r + 1 : r;
+        const nextC = (c + 1) % 9;
+
+        if (newGrid[r][c] !== "") {
+            backtrack(nextR, nextC);
+        } else {
+            for (let num = 1; num <= 9; num++) {
+                if (isValid(r, c, num)) {
+                    newGrid[r][c] = num;
+                    backtrack(nextR, nextC);
+                    newGrid[r][c] = ""; // backtrack
+                }
+
+                if (solutions > 1) return; // stop early if more than one solution
+            }
+        }
+    };
+
+    const isValid = (r, c, num) => {
+        for (let i = 0; i < 9; i++) {
+            if (
+                newGrid[r][i] == num || // row
+                newGrid[i][c] == num || // column
+                newGrid[Math.floor(r / 3) * 3 + Math.floor(i / 3)][
+                    Math.floor(c / 3) * 3 + (i % 3)
+                ] == num // sub-grid
+            ) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    backtrack(0, 0);
+    return solutions;
+};
+
+const createPuzzle = () => {
+    const rows = {};
+    const columns = {};
+    const subGrids = {};
+    for (let i = 0; i < 9; i++) {
+        rows[i] = new Set();
+        columns[i] = new Set();
+        subGrids[i] = new Set();
+    }
+
     sudokuGrid.innerHTML = "";
     for (let i = 0; i < 81; i++) {
         const cellDiv = document.createElement("div");
@@ -20,20 +77,10 @@ const createGrid = () => {
         cellDiv.textContent = "";
         sudokuGrid.appendChild(cellDiv);
     }
-    let cells = sudokuGrid.children;
+    const cells = sudokuGrid.children;
 
-    for (let i = 0; i < 81; i++) {
-        cells[i].textContent = "";
-    }
-
-    for (let i = 0; i < 9; i++) {
-        rows[i] = new Set();
-        columns[i] = new Set();
-        subGrids[i] = new Set();
-    }
-
-    // backtrack to fill grid
-    function fillGrid(i) {
+    // generate full grid
+    const fillGrid = (i) => {
         if (i === 81) {
             return true;
         }
@@ -69,28 +116,45 @@ const createGrid = () => {
             }
         }
 
-        // backtrack if no number works
         return false;
-    }
+    };
 
     fillGrid(0);
-};
 
-const createPuzzle = () => {
-    let cells = sudokuGrid.children;
+    // remove cells to create puzzle
+    let indices = shuffle(Array.from({ length: 81 }, (_, i) => i));
+    while (indices.length > 0) {
+        let i = indices.pop();
+        let cell = cells[i];
+        let num = parseInt(cell.textContent);
+        if (isNaN(num)) {
+            continue;
+        }
+        let row = Math.floor(i / 9);
+        let column = i % 9;
+        let subGrid = Math.floor(row / 3) * 3 + Math.floor(column / 3);
 
-    // randomly remove cells 1 at a time
-    // check for solvability after each removal
-    // backtrack and remove different number if not
-    // generate random number 0-80 references indices of cell for each removal
-    // continue to remove until 50 are gone
+        rows[row].delete(num);
+        columns[column].delete(num);
+        subGrids[subGrid].delete(num);
+        cell.textContent = "";
+        const currentGrid = Array.from(
+            sudokuGrid.children,
+            (cell) => cell.textContent
+        );
+
+        if (sudokuSolver(currentGrid) !== 1) {
+            rows[row].add(num);
+            columns[column].add(num);
+            subGrids[subGrid].add(num);
+            cell.textContent = num;
+        }
+    }
 };
 
 const newPuzzle = document.body.querySelector("#new-puzzle");
 newPuzzle.addEventListener("click", () => {
-    createGrid();
-    // createPuzzle();
+    createPuzzle();
 });
 
-createGrid();
-// createPuzzle();
+createPuzzle();
