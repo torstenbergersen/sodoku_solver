@@ -1,7 +1,16 @@
 const sudokuGrid = document.body.querySelector(".sudoku-grid");
+const rows = {};
+const columns = {};
+const subGrids = {};
 
-// checks for solvability and uniqueness
-function solver() {}
+// fisher-yates shuffle
+const shuffle = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        [array[i], array[randomIndex]] = [array[randomIndex], array[i]]; // swap
+    }
+    return array;
+};
 
 const createGrid = () => {
     sudokuGrid.innerHTML = "";
@@ -17,9 +26,6 @@ const createGrid = () => {
         cells[i].textContent = "";
     }
 
-    const rows = {};
-    const columns = {};
-    const subGrids = {};
     for (let i = 0; i < 9; i++) {
         rows[i] = new Set();
         columns[i] = new Set();
@@ -35,15 +41,6 @@ const createGrid = () => {
         let row = Math.floor(i / 9);
         let column = i % 9;
         let subGrid = Math.floor(row / 3) * 3 + Math.floor(column / 3);
-
-        // fusher-yates shuffle
-        const shuffle = (array) => {
-            for (let i = array.length - 1; i > 0; i--) {
-                const randomIndex = Math.floor(Math.random() * (i + 1));
-                [array[i], array[randomIndex]] = [array[randomIndex], array[i]]; // swap
-            }
-            return array;
-        };
 
         let numbers = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
@@ -79,12 +76,21 @@ const createGrid = () => {
     fillGrid(0);
 };
 
+const createPuzzle = () => {
+    let cells = sudokuGrid.children;
+
+    // randomly remove cells 1 at a time
+    // check for solvability after each removal
+    // backtrack and remove different number if not
+    // generate random number 0-80 references indices of cell for each removal
+    // continue to remove until 50 are gone
+};
+
 const newPuzzle = document.body.querySelector("#new-puzzle");
 newPuzzle.addEventListener("click", () => {
     createGrid();
+    // createPuzzle();
 });
 
-// visualizes solving algorithm within grid
-function solverVisualizer() {}
-
 createGrid();
+// createPuzzle();
