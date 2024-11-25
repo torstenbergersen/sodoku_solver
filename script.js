@@ -9,6 +9,75 @@ const shuffle = (array) => {
     return array;
 };
 
+const solveVisualizer = async () => {
+    const cells = sudokuGrid.children;
+    // convert grid into a 2D array
+    const newGrid = [];
+    for (let i = 0; i < cells.length; i += 9) {
+        newGrid.push(
+            Array.from({ length: 9 }, (_, j) => cells[i + j].textContent || "")
+        );
+    }
+
+    // utility function for delay
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    // backtracking function with animation
+    const backtrack = async (r, c) => {
+        if (r === 9) {
+            return true; // solved
+        }
+
+        const nextR = c === 8 ? r + 1 : r;
+        const nextC = (c + 1) % 9;
+
+        if (newGrid[r][c] !== "") {
+            return await backtrack(nextR, nextC); // skip filled cells
+        }
+
+        for (let num = 1; num <= 9; num++) {
+            if (isValid(r, c, num)) {
+                // visualize placing the number
+                newGrid[r][c] = num;
+                cells[r * 9 + c].textContent = num;
+                cells[r * 9 + c].classList.add("active");
+                await delay(100); // pause for 100ms
+                cells[r * 9 + c].classList.remove("active");
+
+                if (await backtrack(nextR, nextC)) {
+                    return true;
+                }
+
+                // visualize backtracking
+                newGrid[r][c] = "";
+                cells[r * 9 + c].textContent = "";
+                cells[r * 9 + c].classList.add("backtracking");
+                await delay(100); // pause for 100ms
+                cells[r * 9 + c].classList.remove("backtracking");
+            }
+        }
+
+        return false; // no solution
+    };
+
+    const isValid = (r, c, num) => {
+        for (let i = 0; i < 9; i++) {
+            if (
+                newGrid[r][i] == num || // row
+                newGrid[i][c] == num || // column
+                newGrid[Math.floor(r / 3) * 3 + Math.floor(i / 3)][
+                    Math.floor(c / 3) * 3 + (i % 3)
+                ] == num // sub-grid
+            ) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    await backtrack(0, 0);
+};
+
 const sudokuSolver = (grid) => {
     const newGrid = [];
     for (let i = 0; i < grid.length; i += 9) {
@@ -121,9 +190,12 @@ const createPuzzle = () => {
 
     fillGrid(0);
 
+    const cluesCount = 36;
+    let cellsToRemove = 81 - cluesCount;
+
     // remove cells to create puzzle
     let indices = shuffle(Array.from({ length: 81 }, (_, i) => i));
-    while (indices.length > 0) {
+    while (cellsToRemove > 0 && indices.length > 0) {
         let i = indices.pop();
         let cell = cells[i];
         let num = parseInt(cell.textContent);
@@ -148,6 +220,8 @@ const createPuzzle = () => {
             columns[column].add(num);
             subGrids[subGrid].add(num);
             cell.textContent = num;
+        } else {
+            cellsToRemove--;
         }
     }
 };
@@ -155,6 +229,11 @@ const createPuzzle = () => {
 const newPuzzle = document.body.querySelector("#new-puzzle");
 newPuzzle.addEventListener("click", () => {
     createPuzzle();
+});
+
+const solve = document.body.querySelector("#solve-puzzle");
+solve.addEventListener("click", () => {
+    solveVisualizer();
 });
 
 createPuzzle();

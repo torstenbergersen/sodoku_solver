@@ -45,6 +45,15 @@ h1 {
     border: 1px solid black;
     box-sizing: border-box;
 }
+.cell.active {
+    background-color: lightblue;
+    transition: background-color 0.2s;
+}
+
+.cell.backtracking {
+    background-color: lightcoral;
+    transition: background-color 0.2s;
+}
 
 #controls {
     display: flex;
