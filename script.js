@@ -236,8 +236,12 @@ newPuzzle.addEventListener("click", () => {
 });
 
 const solve = document.body.querySelector("#solve-puzzle");
-solve.addEventListener("click", () => {
-    solveVisualizer();
+solve.addEventListener("click", async () => {
+    solve.disabled = true;
+    newPuzzle.disabled = true;
+    await solveVisualizer();
+    newPuzzle.disabled = false;
+    solve.disabled = false;
 });
 
 const reset = document.body.querySelector("#reset");
