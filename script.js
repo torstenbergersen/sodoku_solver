@@ -40,9 +40,8 @@ const solveVisualizer = async () => {
                 // visualize placing the number
                 newGrid[r][c] = num;
                 cells[r * 9 + c].textContent = num;
-                cells[r * 9 + c].classList.add("active");
-                await delay(100); // pause for 100ms
-                cells[r * 9 + c].classList.remove("active");
+                cells[r * 9 + c].classList.add("solved");
+                await delay(50); // pause for 100ms
 
                 if (await backtrack(nextR, nextC)) {
                     return true;
@@ -51,9 +50,7 @@ const solveVisualizer = async () => {
                 // visualize backtracking
                 newGrid[r][c] = "";
                 cells[r * 9 + c].textContent = "";
-                cells[r * 9 + c].classList.add("backtracking");
-                await delay(100); // pause for 100ms
-                cells[r * 9 + c].classList.remove("backtracking");
+                await delay(50); // pause for 100ms
             }
         }
 
