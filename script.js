@@ -226,6 +226,10 @@ const createPuzzle = () => {
     }
 };
 
+function refreshPage() {
+    window.location.reload();
+}
+
 const newPuzzle = document.body.querySelector("#new-puzzle");
 newPuzzle.addEventListener("click", () => {
     createPuzzle();
@@ -234,6 +238,11 @@ newPuzzle.addEventListener("click", () => {
 const solve = document.body.querySelector("#solve-puzzle");
 solve.addEventListener("click", () => {
     solveVisualizer();
+});
+
+const reset = document.body.querySelector("#reset");
+reset.addEventListener("click", () => {
+    refreshPage();
 });
 
 createPuzzle();
